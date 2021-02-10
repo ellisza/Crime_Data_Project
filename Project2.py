@@ -25,13 +25,13 @@ from scipy.stats import ttest_ind
 crime = 'Highest_NIBRS_UCR_Offense_Description'
 df[df.Highest_NIBRS_UCR_Offense_Description == 'Agg Assault']
 agg = df[df.Highest_NIBRS_UCR_Offense_Description == 'Agg Assault']
-# %%
-sns.scatterplot(x=agg.X_Coordinate, y=agg.Y_Coordinate, title='Map of Aggravated Assaults')
+
+sns.scatterplot(x=agg.X_Coordinate, y=agg.Y_Coordinate)
 # %%
 
 agg['Medianhouseholdincome'] = agg['Medianhouseholdincome'].str.replace('$', '').astype('float')
 zip_codes = agg.groupby(by=['Zip_Code_Crime']).agg({'Medianhouseholdincome': 'mean', 'Key': 'count'}).reset_index().dropna()
-sns.scatterplot(x=zip_codes['Medianhouseholdincome'], y=zip_codes['Key'], ylabel = 'Aggravated Assaults', title='Aggravated Assaults in Areas by Median Household Income')
+sns.scatterplot(x=zip_codes['Medianhouseholdincome'], y=zip_codes['Key'])
 # %%
 # Standardizing median household income vs amount of crimes
 from scipy.stats import ttest_ind
@@ -56,16 +56,6 @@ ttest_ind(scaled_df['Medianhouseholdincome'], scaled_df['Key'])
 scaled_df.corr(method='pearson')
 zip_codes.corr(method='pearson')
 
-#%%
-from sklearn import preprocessing
-
-sns.distplot(agg['Medianhouseholdincome'], norm_hist=True, hist = False)
-scaler = preprocessing.StandardScaler()
-
-scaled_df = scaler.fit_transform(agg)
-scaled_df = pd.DataFrame(scaled_df, columns='Medianhouseholdincome')
-
-sns.scatterplot(scaled_df)
 # %%
 import datetime
 import time
@@ -87,4 +77,20 @@ plt.legend()
 
 ttest_ind(poor['Report_Date'], rich['Report_Date'])
 
+# %% 
+# Making a histogram of median income vs amount of crimes. red = under poverty line, blue = over poverty line
+
+plt.hist([poor['Report_Date'], rich['Report_Date']], color=['r','b'], alpha=0.5, density = False)
+
 # %%
+# Standardizing histogram above
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler() 
+data_scaled = scaler.fit_transform(zip_codes)
+
+plt.hist([poor['Report_Date'], rich['Report_Date']], color=['r','b'], alpha=0.5, density = True)
+
+# %%
+
+
